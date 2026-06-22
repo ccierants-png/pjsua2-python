@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 PJPROJECT_VERSION=${PJPROJECT_VERSION:-2.17}
 MAX_CALLS=${MAX_CALLS:-512}
 
