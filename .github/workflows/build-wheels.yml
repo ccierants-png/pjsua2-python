@@ -1,0 +1,62 @@
+name: Build pjsua2 wheels
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  linux-wheels:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [x86_64, aarch64]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install deps
+        run: pip install cibuildwheel
+
+      - name: Build Linux wheels
+        env:
+          CIBW_ARCHS: ${{ matrix.arch }}
+          PJPROJECT_VERSION: "2.17"
+        run: |
+          bash scripts/build_pjproject_linux.sh
+          cibuildwheel --platform linux
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-linux-${{ matrix.arch }}
+          path: wheelhouse/*.whl
+
+  windows-wheels:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install deps
+        run: pip install cibuildwheel
+
+      - name: Build Windows wheels
+        env:
+          PJPROJECT_VERSION: "2.17"
+        run: |
+          powershell scripts/build_pjproject_windows.ps1
+          cibuildwheel --platform windows
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-windows
+          path: wheelhouse/*.whl
